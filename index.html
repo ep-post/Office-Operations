@@ -33,7 +33,7 @@
   <img src="icon-192.png" alt="Office Ops Manager">
   <h1>Office Ops Manager</h1>
   <p>Opening the app — you may be asked to sign in with your @empowerpeople.in Google account.</p>
-  <div class="spinner" aria-hidden="true"></div>
+  <div class="spinner" id="spinner" aria-hidden="true"></div>
   <a class="btn" id="openLink" href="#">Open now</a>
 
   <script>
@@ -42,10 +42,17 @@
 
     document.getElementById('openLink').href = APP_URL;
 
-    // Auto-redirect shortly after load. The visible button is a manual fallback
-    // in case auto-redirect is blocked (some standalone/installed windows are
-    // stricter about automatic navigation on first paint).
-    setTimeout(() => { window.location.href = APP_URL; }, 600);
+    // Only auto-redirect once this is already installed and running as a
+    // standalone app. In a normal browser tab, wait for a manual tap instead —
+    // redirecting immediately would navigate away before the install prompt
+    // has a chance to appear or be clicked.
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) {
+      setTimeout(() => { window.location.href = APP_URL; }, 400);
+    } else {
+      document.getElementById('spinner').style.display = 'none';
+      document.querySelector('p').textContent = 'Tap "Open now" below, or use your browser\'s install option first to add this to your home screen or desktop.';
+    }
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
